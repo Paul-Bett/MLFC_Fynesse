@@ -502,3 +502,17 @@ def visualize_umap(df, features=None, n_neighbors=15, min_dist=0.1, n_components
     ax.set_title('UMAP embedding colored by count')
     plt.tight_layout()
     return fig
+def add_time_features(df):
+    """Add cyclical time features and other derived features."""
+    df = df.copy()
+    idx = df.index if isinstance(df.index, pd.DatetimeIndex) else pd.to_datetime(df['timestamp'])
+    if not isinstance(idx, pd.DatetimeIndex):
+        idx = pd.to_datetime(idx)
+    df['hour'] = idx.hour
+    df['minute'] = idx.minute
+    df['second'] = idx.second
+    # cyclical encoding
+    df['hour_sin'] = np.sin(2*np.pi*df['hour']/24)
+    df['hour_cos'] = np.cos(2*np.pi*df['hour']/24)
+    return df
+
