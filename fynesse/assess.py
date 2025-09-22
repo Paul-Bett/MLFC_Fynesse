@@ -532,4 +532,21 @@ def add_time_features(df):
     df['hour_sin'] = np.sin(2*np.pi*df['hour']/24)
     df['hour_cos'] = np.cos(2*np.pi*df['hour']/24)
     return df
-
+def detect_change_points(series, model='l2', pen=10):
+    """
+    Use ruptures library to detect change points in a numeric series.
+    """
+    if not RUPTURES_AVAILABLE:
+        print("ruptures not installed. pip install ruptures to enable.")
+        return None
+    s = series.dropna().values
+    algo = rpt.Pelt(model=model).fit(s)
+    bkpts = algo.predict(pen=pen)
+    fig, ax = plt.subplots(figsize=(12,3))
+    ax.plot(series.index, series.values)
+    for bk in bkpts:
+        if bk < len(series):
+            ax.axvline(series.index[bk], color='r', linestyle='--')
+    ax.set_title('Change points detected')
+    plt.tight_layout()
+    return fig, bkpts
