@@ -126,3 +126,75 @@ def data() -> Union[pd.DataFrame, None]:
         logger.error(f"Unexpected error loading data: {e}")
         print(f"Error loading data: {e}")
         return None
+
+
+def load_text_log(path):
+    """Load raw text logfile; return list of lines."""
+    with open(path, 'r', encoding='utf-8') as f:
+        lines = [ln.strip() for ln in f if ln.strip()]
+    return lines
+
+def parse_counts_from_loglines(lines,
+                              timestamp_regex=r'Processed (\d{14})-snapshot\.jpg', # Updated regex for YYYYMMDDhhmmss
+                              count_regex=r'Insect count: (\d+)', # Updated regex for "Insect count: "
+                              timestamp_fmt='%Y%m%d%H%M%S'): # Updated format string
+    """
+    Parse timestamp and insect count from each log line.
+    Returns a DataFrame with columns ['timestamp','count','raw_line'].
+    Regexes can be tuned to match your logfile format.
+    """
+    records = []
+    for ln in lines:
+        # timestamp
+        ts_match = re.search(timestamp_regex, ln)
+        if not ts_match:
+            # try ISO-like or epoch parse fallback
+            # skip lines without timestamp
+            continue
+        ts_str = ts_match.group(1)
+        try:
+            ts = datetime.strptime(ts_str, timestamp_fmt)
+        except Exception:
+            # try parsing with pandas (more tolerant)
+            ts = pd.to_datetime(ts_str, errors='coerce', format=timestamp_fmt) # Added format to pandas parse
+            if pd.isna(ts):
+                continue
+            ts = ts.to_pydatetime()
+        # count
+        c = None
+        m = re.search(count_regex, ln, flags=re.I) # Use the updated count regex
+        if m:
+            c = int(m.group(1))
+        else:
+            # Fallback to broader count regex if specific one fails
+            m2 = re.search(r'(\bcount[:= ]*\s*(\d+)\b|\b(\d+)\s*(?:insects|moths|bugs)?\b)', ln, flags=re.I)
+            if m2:
+                c = int(m2.group(2) or m2.group(3)) # Capture group 2 or 3 from the broader regex
+        if c is None:
+            # if no count found, consider NaN (we'll drop or impute later)
+            c = np.nan
+        records.append({'timestamp': ts, 'count': c, 'raw_line': ln})
+    df = pd.DataFrame(records)
+    if not df.empty:
+        df = df.sort_values('timestamp').reset_index(drop=True)
+    return df
+
+def load_weather_csv(path, time_col='timestamp', time_fmt=None):
+    """
+    Load weather CSV. Attempts to parse the time column to datetime.
+    Returns DataFrame with datetime index.
+    """
+    df = pd.read_csv(path)
+    if time_col not in df.columns:
+        # try common names
+        for c in df.columns:
+            if 'time' in c.lower() or 'date' in c.lower():
+                time_col = c
+                break
+    if time_fmt:
+        df[time_col] = pd.to_datetime(df[time_col], format=time_fmt, errors='coerce')
+    else:
+        df[time_col] = pd.to_datetime(df[time_col], errors='coerce')
+    df = df.dropna(subset=[time_col])
+    df = df.set_index(time_col).sort_index()
+    return df
