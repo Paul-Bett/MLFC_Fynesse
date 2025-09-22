@@ -5,6 +5,62 @@ import logging
 from .config import *
 from . import access
 
+# Standard libraries and essential imports
+import os
+import re
+from datetime import datetime, timedelta
+import joblib
+import numpy as np
+import pandas as pd
+
+# Plotting
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.dates import DateFormatter
+import seaborn as sns
+
+# Sklearn models & metrics
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, accuracy_score, f1_score, classification_report, precision_score, recall_score, mean_absolute_percentage_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.inspection import permutation_importance
+
+# Statsmodels
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+# Scipy
+from scipy import stats
+
+# Optional libraries
+try:
+    import umap
+    UMAP_AVAILABLE = True
+except Exception:
+    UMAP_AVAILABLE = False
+
+try:
+    import ruptures as rpt
+    RUPTURES_AVAILABLE = True
+except Exception:
+    RUPTURES_AVAILABLE = False
+
+try:
+    import xgboost as xgb
+    XGBOOST_AVAILABLE = True
+except Exception:
+    XGBOOST_AVAILABLE = False
+
+try:
+    import missingno as msno
+except Exception:
+    pass
+
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
