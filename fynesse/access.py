@@ -126,3 +126,26 @@ def data() -> Union[pd.DataFrame, None]:
         logger.error(f"Unexpected error loading data: {e}")
         print(f"Error loading data: {e}")
         return None
+
+def parse_insect_log_lines(lines):
+    """
+    Parse lines from the insect log file into dataframe with timestamp + count.
+    Example line:
+    'Processed 20241002003529-snapshot.jpg - Insect count: 34'
+    """
+    pattern = r"Processed (\d+)-snapshot\.jpg - Insect count: (\d+)"
+    data = []
+    for line in lines:
+        match = re.search(pattern, line)
+        if match:
+            ts_str, count = match.groups()
+            timestamp = pd.to_datetime(ts_str, format="%Y%m%d%H%M%S")
+            data.append({"timestamp": timestamp, "count": int(count)})
+    return pd.DataFrame(data)
+
+def load_text_log(path):
+    """
+    Load raw lines from a log file.
+    """
+    with open(path, "r") as f:
+        return f.readlines()
