@@ -406,17 +406,34 @@ def cross_correlation(x, y, maxlags=50):
     slice_idx = slice(center-maxlags, center+maxlags+1)
     return lags[slice_idx], corr[slice_idx]
 
-def plot_crosscorr(df, col_x, col_y, maxlags=200, figsize=(10,4)):
-    x = df[col_x].dropna()
-    y = df[col_y].dropna()
-    # align indexes by inner join
-    both = df[[col_x, col_y]].dropna()
-    lags, corr = cross_correlation(both[col_x].values, both[col_y].values, maxlags=maxlags)
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.stem(lags, corr, use_line_collection=True)
-    ax.set_xlabel('lag')
-    ax.set_ylabel('cross-correlation')
-    ax.set_title(f'Cross-correlation: {col_x} vs {col_y}')
+def plot_crosscorr(df, xcol, ycol, maxlags=50):
+    """
+    Cross-correlation plot between two time series.
+    Handles both DataFrames with 'timestamp' column
+    and DataFrames with a DatetimeIndex.
+    """
+    import statsmodels.api as sm
+    import matplotlib.pyplot as plt
+
+    # Ensure datetime index
+    if 'timestamp' in df.columns:
+        ts_df = df.set_index('timestamp')
+    else:
+        ts_df = df.copy()
+        if not isinstance(ts_df.index, pd.DatetimeIndex):
+            raise ValueError("plot_crosscorr requires either a 'timestamp' column or a DatetimeIndex.")
+
+    # Drop missing values for selected columns
+    ts_df = ts_df[[xcol, ycol]].dropna()
+
+    # Compute cross-correlation
+    fig, ax = plt.subplots(figsize=(12, 4))
+    sm.graphics.tsa.plot_ccf(ts_df[xcol], ts_df[ycol], lags=maxlags, ax=ax)
+
+    ax.set_title(f"Cross-Correlation: {xcol} vs {ycol}")
+    ax.set_xlabel("Lag")
+    ax.set_ylabel("CCF")
+
     plt.tight_layout()
     return fig
 
