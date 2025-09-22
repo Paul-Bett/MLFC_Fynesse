@@ -12,6 +12,7 @@ from typing import Any, Union
 from sklearn.linear_model import LinearRegression
 import pandas as pd
 import logging
+import numpy as np
 
 # Set up logging
 logger = logging.getLogger(__name__)
