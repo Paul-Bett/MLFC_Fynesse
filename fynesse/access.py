@@ -53,6 +53,7 @@ Best Practice on Implementation
 from typing import Any, Union
 import pandas as pd
 import logging
+import re
 
 # Set up basic logging
 logging.basicConfig(
