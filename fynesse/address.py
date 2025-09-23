@@ -14,6 +14,8 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 import pandas as pd
 import logging
 import numpy as np
+import xgboost as xgb
+XGBOOST_AVAILABLE = True
 
 # Set up logging
 logger = logging.getLogger(__name__)
