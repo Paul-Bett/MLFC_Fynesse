@@ -11,6 +11,7 @@ This module handles question addressing functionality including:
 from typing import Any, Union
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import pandas as pd
 import logging
 import numpy as np
