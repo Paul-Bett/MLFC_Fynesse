@@ -16,6 +16,7 @@ import pandas as pd
 import logging
 import numpy as np
 import xgboost as xgb
+import matplotlib.pyplot as plt
 XGBOOST_AVAILABLE = True
 
 # Set up logging
