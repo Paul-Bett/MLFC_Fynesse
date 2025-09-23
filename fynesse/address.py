@@ -9,7 +9,7 @@ This module handles question addressing functionality including:
 """
 
 from typing import Any, Union
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge
 import pandas as pd
 import logging
 import numpy as np
